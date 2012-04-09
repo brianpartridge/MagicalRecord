@@ -336,6 +336,16 @@ static NSUInteger defaultBatchSize = kMagicalRecordDefaultBatchSize;
 	return request;
 }
 
++ (NSFetchRequest *) MR_requestAllSortedBy:(NSArray *)sortDescriptors withPredicate:(NSPredicate *)searchTerm inContext:(NSManagedObjectContext *)context
+{
+	NSFetchRequest *request = [self MR_requestAllInContext:context];
+	[request setPredicate:searchTerm];
+	[request setFetchBatchSize:[self MR_defaultBatchSize]];
+	[request setSortDescriptors:sortDescriptors];
+
+	return request;
+}
+
 + (NSFetchRequest *) MR_requestAllSortedBy:(NSString *)sortTerm ascending:(BOOL)ascending withPredicate:(NSPredicate *)searchTerm;
 {
 	NSFetchRequest *request = [self MR_requestAllSortedBy:sortTerm
@@ -494,6 +504,22 @@ static NSUInteger defaultBatchSize = kMagicalRecordDefaultBatchSize;
 	
 	[self MR_performFetch:controller];
 	return controller;
+}
+
++ (NSFetchedResultsController *)MR_fetchAllSortedBy:(NSArray *)sortDescriptors withPredicate:(NSPredicate *)searchTerm groupBy:(NSString *)groupingKeyPath delegate:(id<NSFetchedResultsControllerDelegate>)delegate inContext:(NSManagedObjectContext *)context
+{
+	NSFetchRequest *request = [self MR_requestAllSortedBy:sortDescriptors
+                                            withPredicate:searchTerm
+                                                inContext:context];
+
+    NSFetchedResultsController *controller = [self MR_fetchController:request
+                                                             delegate:delegate
+                                                         useFileCache:NO
+                                                            groupedBy:groupingKeyPath
+                                                            inContext:context];
+
+    [self MR_performFetch:controller];
+    return controller;
 }
 
 + (NSFetchedResultsController *) MR_fetchAllSortedBy:(NSString *)sortTerm ascending:(BOOL)ascending withPredicate:(NSPredicate *)searchTerm groupBy:(NSString *)groupingKeyPath delegate:(id<NSFetchedResultsControllerDelegate>)delegate
